@@ -27,7 +27,7 @@ export default function Navbar({ user, isAdmin, isSubscriber }: NavbarProps) {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/charities', label: 'Charities' },
-    ...(isSubscriber ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+    ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin' }] : []),
   ]
 
