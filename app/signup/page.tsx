@@ -32,8 +32,8 @@ export default function SignupPage() {
     if (error) {
       toast.error(error.message)
     } else {
-      toast.success('Account created! Choose your subscription plan.')
-      router.push('/subscribe')
+      toast.success('Account created! Now choose your charity.')
+      router.push('/signup/select-charity')
       router.refresh()
     }
   }
