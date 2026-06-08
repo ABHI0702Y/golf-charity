@@ -41,6 +41,19 @@ export async function sendWinnerVerificationEmail(
   return resend.emails.send({ from: FROM, to, subject, text: body })
 }
 
+export async function sendDonationEmail(
+  to: string,
+  charityName: string,
+  amountGbp: string
+) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Thank you for your donation to ${charityName}!`,
+    text: `Thank you for your generous donation of £${amountGbp} to ${charityName} via GolfGives. Your contribution makes a real difference. A payment receipt has been sent separately by Stripe.`,
+  })
+}
+
 export async function sendSubscriptionEmail(
   to: string,
   name: string,

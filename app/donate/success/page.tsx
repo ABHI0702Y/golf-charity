@@ -1,5 +1,6 @@
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/server'
+import { sendDonationEmail } from '@/lib/email'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 
@@ -43,6 +44,18 @@ export default async function DonateSuccessPage({
         stripe_payment_intent_id: paymentIntentId,
         status: 'paid',
       })
+
+      // Send confirmation email to the donor
+      const donorEmail = session.customer_details?.email
+      if (donorEmail) {
+        const { data: charityData } = await supabase
+          .from('charities')
+          .select('name')
+          .eq('id', charity_id)
+          .single()
+        const name = charityData?.name ?? 'the charity'
+        await sendDonationEmail(donorEmail, name, ((session.amount_total ?? 0) / 100).toFixed(2)).catch(console.error)
+      }
     }
   }
 
