@@ -1,14 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PUBLIC_PATHS = ['/', '/charities', '/login', '/signup', '/subscribe', '/signup/select-charity', '/api/stripe/webhook']
+const PUBLIC_PATHS = ['/', '/charities', '/login', '/signup', '/subscribe', '/signup/select-charity', '/donate', '/api/stripe/webhook']
 
 export async function proxy(request: NextRequest) {
   const { supabaseResponse, user, supabase } = await updateSession(request)
   const { pathname } = request.nextUrl
 
   if (
-    PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith('/charities/')) ||
+    PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith('/charities/') || pathname.startsWith('/donate/')) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/stripe/webhook')
   ) {
