@@ -27,8 +27,8 @@ function LoginForm() {
       toast.error(error.message)
     } else {
       toast.success('Welcome back!')
-      router.push(redirectTo)
       router.refresh()
+      router.push(redirectTo)
     }
   }
 
