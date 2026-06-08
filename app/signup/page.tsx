@@ -33,8 +33,8 @@ export default function SignupPage() {
       toast.error(error.message)
     } else {
       toast.success('Account created! Now choose your charity.')
-      router.push('/signup/select-charity')
       router.refresh()
+      router.push('/signup/select-charity')
     }
   }
 
