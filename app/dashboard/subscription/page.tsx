@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { format } from 'date-fns'
+import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 import ManageSubscriptionButton from '@/components/dashboard/ManageSubscriptionButton'
 
 export default async function SubscriptionPage() {
@@ -64,12 +66,19 @@ export default async function SubscriptionPage() {
             )}
           </dl>
         ) : (
-          <p className="text-[#6b7c6e] text-sm">No active subscription.</p>
+          <div className="flex flex-col gap-4">
+            <p className="text-[#6b7c6e] text-sm">No active subscription.</p>
+            <Link href="/subscribe">
+              <Button size="lg" className="w-full">Choose a plan</Button>
+            </Link>
+          </div>
         )}
 
-        <div className="mt-6 pt-6 border-t border-[#1e2d24]">
-          <ManageSubscriptionButton />
-        </div>
+        {sub && (
+          <div className="mt-6 pt-6 border-t border-[#1e2d24]">
+            <ManageSubscriptionButton />
+          </div>
+        )}
       </Card>
     </div>
   )
