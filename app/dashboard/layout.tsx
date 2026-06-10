@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import DashboardNav from '@/components/dashboard/DashboardNav'
 
@@ -6,10 +7,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-    isAdmin = profile?.role === 'admin'
+  if (!user) redirect('/login')
+
+  const [{ data: profile }, { data: subscription }] = await Promise.all([
+    supabase.from('profiles').select('role').eq('id', user.id).maybeSingle(),
+    supabase.from('subscriptions').select('status').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
+  ])
+
+  const isAdmin = profile?.role === 'admin'
+
+  // Non-subscribers and non-admins redirected to subscribe page
+  if (!subscription && !isAdmin) {
+    redirect('/subscribe')
   }
 
   return (
