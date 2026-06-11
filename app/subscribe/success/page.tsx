@@ -1,7 +1,49 @@
+import { stripe } from '@/lib/stripe'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
+import Stripe from 'stripe'
 
-export default function SubscribeSuccessPage() {
+export default async function SubscribeSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>
+}) {
+  const { session_id } = await searchParams
+
+  if (session_id) {
+    try {
+      const session = await stripe.checkout.sessions.retrieve(session_id, {
+        expand: ['subscription'],
+      })
+
+      const sub = session.subscription as Stripe.Subscription | null
+      const userId = session.metadata?.user_id ?? sub?.metadata?.user_id
+      const plan = session.metadata?.plan ?? sub?.metadata?.plan ?? 'monthly'
+
+      if (sub && userId) {
+        const supabase = await createAdminClient()
+        const item = sub.items?.data?.[0]
+        await supabase.from('subscriptions').upsert({
+          user_id: userId,
+          stripe_subscription_id: sub.id,
+          plan,
+          status: 'active',
+          current_period_start: item?.current_period_start
+            ? new Date(item.current_period_start * 1000).toISOString()
+            : null,
+          current_period_end: item?.current_period_end
+            ? new Date(item.current_period_end * 1000).toISOString()
+            : null,
+          cancel_at_period_end: sub.cancel_at_period_end,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'stripe_subscription_id' })
+      }
+    } catch {
+      // Webhook will handle it if this fails
+    }
+  }
+
   return (
     <div className="min-h-screen hero-gradient flex items-center justify-center px-4">
       <div className="text-center max-w-md">
