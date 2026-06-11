@@ -1,5 +1,5 @@
 import { stripe } from '@/lib/stripe'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 import Stripe from 'stripe'
@@ -13,12 +13,16 @@ export default async function SubscribeSuccessPage({
 
   if (session_id) {
     try {
+      // Get current logged-in user
+      const supabaseUser = await createClient()
+      const { data: { user } } = await supabaseUser.auth.getUser()
+
       const session = await stripe.checkout.sessions.retrieve(session_id, {
         expand: ['subscription'],
       })
 
       const sub = session.subscription as Stripe.Subscription | null
-      const userId = session.metadata?.user_id ?? sub?.metadata?.user_id
+      const userId = user?.id ?? session.metadata?.user_id ?? sub?.metadata?.user_id
       const plan = session.metadata?.plan ?? sub?.metadata?.plan ?? 'monthly'
 
       if (sub && userId) {
